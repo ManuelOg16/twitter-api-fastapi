@@ -1,6 +1,6 @@
 #Python
 from uuid import UUID
-from datetime import date 
+from datetime import date, datetime
 from typing import Optional
 
 #Pydantic
@@ -25,7 +25,8 @@ class UserBase(BaseModel): # have the information basic the user the return in R
 class UserLogin(UserBase): #The model return when the user  Logged in our API
     password: str = Field(
     ...,
-        min_length=8
+        min_length=8,
+        max_length=64
     )
 
 class User(UserBase): # others tasks with users we used a User, but not the password
@@ -41,7 +42,15 @@ class User(UserBase): # others tasks with users we used a User, but not the pass
     )
     birth_date: Optional[date] = Field(default=None)
 class Tweet(BaseModel):
-    pass
+    tweet_id: UUID = Field(...)
+    content: str = Field(
+        ...,
+        min_length=1,
+        max_length= 256
+    )
+    created_at: datetime = Field(default=datetime.now()) #la fecha de creación del tweet con hora
+    update_at: Optional[datetime] = Field(default=None)  #el momento en el que se actualiza el tweet si es que lo actualizamos, en la realidad tweeter no deja actualizar pero nosotros si lo vamos a hacer
+    by: User = Field(...)            #by va indicar el usuario que creo el tweet, este atributo es de tipo user aprovechamos la herencia de la programacion orientada a objetos
 
 @app.get(
     path="/")
