@@ -22,12 +22,21 @@ class UserBase(BaseModel): # have the information basic the user the return in R
     user_id: UUID = Field(...)  #UUID =Universally Unique IDentifier es una clase especial de python que nos permite colocar un identificador unico cada vez a cada uno de lso usuarios  y entidades que nosotros creamos en nuestra aplicación
     email: EmailStr = Field(...)
 
-class UserLogin(UserBase): #The model return when the user  Logged in our API
+class PasswordMixin(BaseModel):   # Creamos este nuevo modelo para no repetir codigo del password
     password: str = Field(
     ...,
         min_length=8,
-        max_length=64
+        max_length=64,
+        example='password'
     )
+
+class UserLogin(PasswordMixin,UserBase): #The model return when the user  Logged in our API
+    # password: str = Field(
+    # ...,
+    #     min_length=8,
+    #     max_length=64
+    # )
+    pass
 
 class User(UserBase): # others tasks with users we used a User, but not the password
     first_name: str = Field(
@@ -41,6 +50,15 @@ class User(UserBase): # others tasks with users we used a User, but not the pass
         max_length=50
     )
     birth_date: Optional[date] = Field(default=None)
+
+class UserRegister(PasswordMixin,User): #Nuevo modelo para el registro del usuario en la aplicación
+    # password: str = Field(
+    # ...,
+    #     min_length=8,
+    #     max_length=64
+    # )  
+    pass
+
 class Tweet(BaseModel):
     tweet_id: UUID = Field(...)
     content: str = Field(
@@ -67,7 +85,22 @@ class Tweet(BaseModel):
     tags=["Users"] # la path operation va estar dentro de la pestaña Users
 )
 def signup():
-    pass
+    """
+    Signup
+
+    This path operation register a user in the app
+
+    Parameters: 
+        - Request body parameter
+            - user: UserRegister
+
+    Returns a json with the basic user information:
+        - user_id: UUID
+        - email: Emailstr
+        - first_name: str
+        - last_name: str
+        - birth_date: str
+    """
 
 ### Login a user
 @app.post(
