@@ -67,7 +67,7 @@ class Tweet(BaseModel):
         max_length= 256
     )
     created_at: datetime = Field(default=datetime.now()) #la fecha de creación del tweet con hora
-    update_at: Optional[datetime] = Field(default=None)  #el momento en el que se actualiza el tweet si es que lo actualizamos, en la realidad tweeter no deja actualizar pero nosotros si lo vamos a hacer
+    updated_at: Optional[datetime] = Field(default=None)  #el momento en el que se actualiza el tweet si es que lo actualizamos, en la realidad tweeter no deja actualizar pero nosotros si lo vamos a hacer
     by: User = Field(...)            #by va indicar el usuario que creo el tweet, este atributo es de tipo user aprovechamos la herencia de la programacion orientada a objetos
 
 
@@ -206,9 +206,36 @@ def home():
     summary= "Post a tweet ",
     tags=["Tweets"] 
 )
-def post():
-    pass
+def post(tweet: Tweet = Body(...)): #vamos  a pedirle a un usuario de nuestra API que nos envie un Request Body con un json que tenga un tweet 
+    """
+    Post a Tweet
 
+    This path operation post a Tweet in the app
+
+    Parameters: 
+        - Request body parameter
+            - tweet: Tweet
+
+    Returns a json with the basic tweet information:
+        tweet_id: UUID 
+        content: str 
+        created_at: datetime
+        updated_at:  Optional[datetime]
+        by: User 
+    """
+    with open("tweets.json", "r+", encoding= "utf-8") as f:  
+        results = json.loads(f.read()) 
+        tweet_dict= tweet.dict() 
+        tweet_dict["tweet_id"] = str(tweet_dict["tweet_id"])   
+        tweet_dict["created_at"] = str(tweet_dict["created_at"]) 
+        tweet_dict["updated_at"] = str(tweet_dict["updated_at"]) 
+        tweet_dict["by"]["user_id"] = str(tweet_dict["by"]["user_id"]) #como esto es una lista de diccionarios puedo acceder a las llaves de ese diccionario interno con otro juego de []
+        tweet_dict["by"]["birth_date"] = str(tweet_dict["by"]["birth_date"])
+        results.append(tweet_dict) 
+        f.seek(0)       
+        f.write(json.dumps(results))  
+        return tweet  
+        
 ### Show a Tweet
 @app.get(      #estamos obteniendo informacion desde el cliente al servidor
     path= "/tweets/{tweet_id}",
